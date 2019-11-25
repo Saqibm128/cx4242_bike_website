@@ -130,3 +130,17 @@ addBikeLogo = svg2.selectAll("bike_logo")
 				.attr("xlink:href", function (d) {return logos[1];})
 				.attr("x", 10)
 				.attr("y", 10)
+
+function getUserInfo() {
+	var userInfo = [];
+	 month = document.getElementById("month").value;
+	 day = document.getElementById("day").value;
+	 time = document.getElementById("time").value;
+	 weight = document.getElementById("weight").value;
+	 height = document.getElementById("height").value;
+	 userInfo.push(month, day, time, weight, height)
+	 //console.log(userInfo);
+}
+
+var button = document.getElementById("compareTripsButton");
+button.addEventListener("click", getUserInfo, false);
