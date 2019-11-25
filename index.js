@@ -8,7 +8,7 @@ height_map = 600
 d3.json("ubuntu@ec2-18-212-131-13.compute-1.amazonaws.com:5000/uber_rides", {
     "method": "POST",
     "body": {
-        "condition": " 3"
+        "condition": ""
     }
 }, function(d) {
     console.log(d)
