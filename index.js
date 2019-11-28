@@ -5,6 +5,15 @@ height_trip_info = 600
 width_map = 600
 height_map = 600
 
+var result = fetch("http://ec2-18-212-131-13.compute-1.amazonaws.com:5000/uber_ride", {
+    "method": "POST", "headers":{"Content-Type":"application/json"},
+    "body": JSON.stringify({
+        "condition": "where day in (26, 27)"
+    })
+}).then(function(d) {
+    return (d.json())
+}).then(function(d) {console.log(d)})
+
 var svg1 = d3.select("#svg_user_input");
 svg1.append("rect")
     .attr("width", width_user_input)
