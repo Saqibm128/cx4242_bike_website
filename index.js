@@ -1,3 +1,20 @@
+
+
+async function get_all_uber_rides_for_day(day, month, year) {
+  // This is an async function
+  // Example usage: get_all_uber_rides_for_day(1,10,2014).then(function(res) { svgText.text(res) })
+  let result = await fetch("http://ec2-18-212-131-13.compute-1.amazonaws.com:5000/uber_ride", {
+      "method": "POST", "headers":{"Content-Type":"application/json"},
+      "body": JSON.stringify({
+          "condition": "where day in " + day + " and year=" + year + " and month = " + month
+      })
+  })
+
+  let resultJson = await result.json()
+  return resultJson
+}
+
+
 width_user_input = 600
 height_user_input = 600
 width_trip_info = 800
@@ -142,5 +159,7 @@ function getUserInfo() {
 	 //console.log(userInfo);
 }
 
-var button = document.getElementById("compareTripsButton");
-button.addEventListener("click", getUserInfo, false);
+document.addEventListener("DOMContentLoaded", function(event) {
+  var button = document.querySelector("input[name=compareTripsButton]");
+  button.addEventListener("click", getUserInfo, false);
+});
