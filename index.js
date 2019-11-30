@@ -14,6 +14,20 @@ async function get_all_uber_rides_for_day(day, month, year) {
   return resultJson
 }
 
+async function get_all_uber_rides_for_day_near_lat_lng(day, month, year, startLatLng, endLatLng) {
+  // This is an async function
+  // Example usage: get_all_uber_rides_for_day(1,10,2014).then(function(res) { svgText.text(res) })
+  let result = await fetch("http://ec2-18-212-131-13.compute-1.amazonaws.com:5000/uber_ride", {
+      "method": "POST", "headers":{"Content-Type":"application/json"},
+      "body": JSON.stringify({
+          "condition": "where day in " + day + " and year=" + year + " and month = " + month
+      })
+  })
+
+  let resultJson = await result.json()
+  return resultJson
+}
+
 
 width_user_input = 600
 height_user_input = 600
