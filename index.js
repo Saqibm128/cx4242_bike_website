@@ -21,6 +21,10 @@ width_trip_info = 800
 height_trip_info = 600
 width_map = 600
 height_map = 600
+startLatLng = null
+endLatLng = null
+startMarker = null
+endMarker = null
 
 var result = fetch("http://ec2-18-212-131-13.compute-1.amazonaws.com:5000/uber_ride", {
     "method": "POST", "headers":{"Content-Type":"application/json"},
@@ -185,4 +189,28 @@ document.addEventListener("DOMContentLoaded", function(event) {
   });
 
   map.addLayer(labelLayer);
+
+  map.on('click', function(e){
+  var coord = e.latlng;
+  var lat = coord.lat;
+  var lng = coord.lng;
+  console.log("You clicked the map at latitude: " + lat + " and longitude: " + lng);
+  if (startLatLng == null) {
+    startMarker = L.marker([lat, lng]).addTo(map);
+    startLatLng = [lat, lng]
+    startMarker.bindPopup("Start Location!").openPopup();
+  } else if (endLatLng == null) {
+    endLatLng = [lat, lng]
+    endMarker = L.marker([lat, lng]).addTo(map);
+    startLatLng = [lat, lng]
+    endMarker.bindPopup("End Location!").openPopup();
+  } else {
+    map.removeLayer(startMarker)
+    map.removeLayer(endMarker)
+    startMarker = L.marker([lat, lng]).addTo(map);
+    startLatLng = [lat, lng]
+    startMarker.bindPopup("Start Location!").openPopup();
+    endLatLng = null
+  }
+  });
 });
