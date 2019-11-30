@@ -162,4 +162,27 @@ function getUserInfo() {
 document.addEventListener("DOMContentLoaded", function(event) {
   var button = document.querySelector("input[name=compareTripsButton]");
   button.addEventListener("click", getUserInfo, false);
+  var map = L.map('map' /* The id of the DOM element that will contain the map */);
+
+  map.setView([40.703312, -73.97968], 10);
+
+  var baseLayer = L.tileLayer('https://maps{s}.nyc.gov/tms/1.0.0/carto/basemap/{z}/{x}/{y}.jpg', {
+    minNativeZoom: 8,
+    maxNativeZoom: 19,
+    subdomains: '1234',
+    tms: true,
+    bounds: L.latLngBounds([39.3682, -75.9374], [42.0329, -71.7187])
+  });
+
+  map.addLayer(baseLayer);
+
+  var labelLayer = L.tileLayer('https://maps{s}.nyc.gov/tms/1.0.0/carto/label/{z}/{x}/{y}.png8', {
+    minNativeZoom: 8,
+    maxNativeZoom: 19,
+    subdomains: '1234',
+    tms: true,
+    bounds: L.latLngBounds([40.0341, -74.2727], [41.2919, -71.9101])
+  });
+
+  map.addLayer(labelLayer);
 });
