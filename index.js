@@ -1,5 +1,3 @@
-
-
 async function get_all_uber_rides_for_day(day, month, year) {
   // This is an async function
   // Example usage: get_all_uber_rides_for_day(1,10,2014).then(function(res) { svgText.text(res) })
@@ -12,6 +10,28 @@ async function get_all_uber_rides_for_day(day, month, year) {
 
   let resultJson = await result.json()
   return resultJson
+}
+
+async function get_distance_between(startLatLng, endLatLng) {
+  var currDistance = null
+  var service = new google.maps.DistanceMatrixService();
+  service.getDistanceMatrix(
+    {
+      origins: [new google.maps.LatLng(startLatLng[0], startLatLng[1])],
+      destinations: [new google.maps.LatLng(endLatLng[0], endLatLng[1])],
+      travelMode: 'DRIVING'
+    }, callback);
+
+  function callback(res) {
+    currDistance = res.rows[0].elements[0].distance.value
+  }
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  while (currDistance == null) {
+    await sleep(200)
+  }
+  return currDistance
 }
 
 async function get_all_uber_rides_for_day_near_lat_lng(day, month, year, startLatLng, endLatLng) {
@@ -32,6 +52,17 @@ async function get_all_uber_rides_for_day_near_lat_lng(day, month, year, startLa
   return resultJson
 }
 
+async function get_all_uber_rides_for_day_mean_speed(day, month, year, startLatLng, endLatLng) {
+  // console.log(day)
+  res = await get_all_uber_rides_for_day_near_lat_lng(day, month, year, startLatLng, endLatLng)
+  // console.log(res)
+  // console.log(res["columns"].indexOf("speed_mph_mean"))
+  speeds = res["values"].map((x)=>x[res["columns"].indexOf("speed_mph_mean")])
+  sumSpeeds = speeds.reduce((total, speed) => total + speed)
+  // console.log("hi")
+  return sumSpeeds / speeds.length
+}
+
 
 width_user_input = 600
 height_user_input = 600
@@ -43,6 +74,9 @@ startLatLng = null
 endLatLng = null
 startMarker = null
 endMarker = null
+var month = null
+var day = null
+var year = 2019
 
 var result = fetch("http://ec2-18-212-131-13.compute-1.amazonaws.com:5000/uber_ride", {
     "method": "POST", "headers":{"Content-Type":"application/json"},
@@ -139,6 +173,16 @@ uberInfo = svg2.selectAll("uber_text")
     				return uberTripNums[i] + " " + d;
   				});
 
+function update_all() {
+  update_uber()
+}
+
+function update_uber() {
+  svg2.selectAll("uber_text").text(function(d, i) {
+    return uberTripNums[i] + " " + d;
+  });
+}
+
 bikeInfo = svg2.selectAll("bike_text")
 				.data(tripLabels)
 				.enter()
@@ -172,12 +216,27 @@ addBikeLogo = svg2.selectAll("bike_logo")
 
 function getUserInfo() {
 	var userInfo = [];
-	 month = document.getElementById("month").value;
-	 day = document.getElementById("day").value;
-	 time = document.getElementById("time").value;
-	 weight = document.getElementById("weight").value;
-	 height = document.getElementById("height").value;
+	 month = document.querySelector("input[name=month]").value;
+	 day = document.querySelector("input[name=day]").value;
+	 time = document.querySelector("input[name=time]").value;
+	 weight = document.querySelector("input[name=weight]").value;
+	 height = document.querySelector("input[name=height]").value;
 	 userInfo.push(month, day, time, weight, height)
+   if (startLatLng !== null && endLatLng !== null) {
+     // console.log("hi")
+     get_all_uber_rides_for_day_mean_speed(day, month, year, startLatLng, endLatLng).then((uberRes)=>{
+
+
+
+       get_distance_between(startLatLng, endLatLng).then((googleRes)=>{
+         num_minutes = ((googleRes * 0.000621371) / uberRes * 60)
+         uberTripNums[0] = num_minutes
+         update_all()
+       })
+     })
+
+
+   }
 	 //console.log(userInfo);
 }
 
@@ -220,7 +279,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
   } else if (endLatLng == null) {
     endLatLng = [lat, lng]
     endMarker = L.marker([lat, lng]).addTo(map);
-    startLatLng = [lat, lng]
     endMarker.bindPopup("End Location!").openPopup();
   } else {
     map.removeLayer(startMarker)
@@ -232,3 +290,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
   }
   });
 });
+
+// var googleMap;
+// function initMap() {
+//     var googleMap = new google.maps.Map(document.getElementById('map'), {
+//       center: {lat: -34.397, lng: 150.644},
+//       zoom: 8
+//     });
+//   }
