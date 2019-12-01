@@ -168,6 +168,7 @@ uberInfo = svg2.selectAll("uber_text")
   				.attr('y', function(d, i) {
     					return ((i+1) * 150);
   				})
+				.attr("class", "uber_text")
   				.style("fill", "white")
   				.text(function(d, i) {
     				return uberTripNums[i] + " " + d;
@@ -175,6 +176,7 @@ uberInfo = svg2.selectAll("uber_text")
 
 function update_all() {
   update_uber()
+  addUberResults(uberTripNums)
 }
 
 function update_uber() {
@@ -192,6 +194,7 @@ bikeInfo = svg2.selectAll("bike_text")
   				.attr('y', function(d, i) {
     					return ((i+1) * 150);
   				})
+				.attr("class", "bike_text")
   				.style("fill", "white")
   				.text(function(d, i) {
     				return bikeTripNums[i] + " " + d;
@@ -216,6 +219,7 @@ addBikeLogo = svg2.selectAll("bike_logo")
 
 function getUserInfo() {
 	var userInfo = [];
+
 	 month = document.querySelector("input[name=month]").value;
 	 day = document.querySelector("input[name=day]").value;
 	 time = document.querySelector("input[name=time]").value;
@@ -229,7 +233,9 @@ function getUserInfo() {
 
 
        get_distance_between(startLatLng, endLatLng).then((googleRes)=>{
+         uberDistance = (googleRes * 0.000621371)
          num_minutes = ((googleRes * 0.000621371) / uberRes * 60)
+         uberTime = num_minutes
          uberTripNums[0] = num_minutes
          update_all()
        })
@@ -237,12 +243,106 @@ function getUserInfo() {
 
 
    }
-	 //console.log(userInfo);
+	return userInfo;
+};
+
+function calories_burnt_biking(weight, distance_biked){
+    var cals_burned = 0;
+    if(weight>= 125){
+        cals_burned = Math.round((40 + ((weight-125) * 0.32)) * distance_biked);
+    }
+    else{
+        cals_burned = Math.round((25 + ((weight-75) * 0.32)) * distance_biked);
+    }
+
+    return cals_burned;
+};
+
+function co2_emissions_per_ride(distance_ride){
+    var co2 = Math.round(404 * distance_ride);
+    return co2;
+};
+
+function addUberResults(uberTripNums) {
+	//uberTripNums = [time, calories, emissions]
+	svg2.selectAll(".uber_text").remove();
+
+	svg2.selectAll("#uber_text")
+				.data(tripLabels)
+				.enter()
+				.append("text")
+				.attr("transform", "translate(" + 0 + "," + ((1/5)*height_trip_info - 50)  + ")")
+  				.attr('x', 0.1*width_trip_info)
+  				.attr('y', function(d, i) {
+    					return ((i+1) * 150);
+  				})
+  				.attr("class", "uber_text")
+  				.style("fill", "white")
+  				.text(function(d, i) {
+    				return uberTripNums[i] + " " + d;
+  				});
 }
+
+function addBikeResults(bikeTripNums) {
+	//bikeTripNums = [time, calories, emissions]
+	svg2.selectAll(".bike_text").remove();
+
+	svg2.selectAll("#bike_text")
+				.data(tripLabels)
+				.enter()
+				.append("text")
+				.attr("transform", "translate(" + width_trip_info/2 + "," + ((1/5)*height_trip_info - 50)  + ")")
+  				.attr('x', 0.3*width_trip_info)
+  				.attr('y', function(d, i) {
+    					return ((i+1) * 150);
+  				})
+  				.attr("class", "bike_text")
+  				.style("fill", "white")
+  				.text(function(d, i) {
+    				return bikeTripNums[i] + " " + d;
+  				});
+
+};
+
+var uberDistance = 0;
+var uberTime = 0;
+
+function compareTrips() {
+	var userInfo = getUserInfo();
+	var weight = userInfo[3];
+	//Process user info
+	//Get distance and time estimates (currently random nums to check)
+
+	//Citibike
+	var bikeDistance = Math.random();
+	var bikeTime = Math.random();
+	var bikeCalories = calories_burnt_biking(weight, bikeDistance);
+	var bikeEmissions = 0;
+
+
+	//Uber
+	// var uberDistance = Math.random();
+	// var uberTime = Math.random();
+	var uberCalories = 0;
+	var uberEmissions = co2_emissions_per_ride(uberDistance);
+
+
+	var uberResults = [uberTime, uberCalories, uberEmissions]; //[time, calories, emissions]
+	var bikeResults = [bikeTime, bikeCalories, bikeEmissions]; //[time, calories, emissions]
+
+	addBikeResults(bikeResults);
+	addUberResults(uberResults);
+};
 
 document.addEventListener("DOMContentLoaded", function(event) {
   var button = document.querySelector("input[name=compareTripsButton]");
-  button.addEventListener("click", getUserInfo, false);
+  button.addEventListener("click", compareTrips, false);
+//var button = document.getElementById("compareTripsButton");
+//if(button){
+  //button.addEventListener("click", compareTrips, false);
+//} else {
+	//console.log(button);
+//}
   var map = L.map('map' /* The id of the DOM element that will contain the map */);
 
   map.setView([40.703312, -73.97968], 10);
