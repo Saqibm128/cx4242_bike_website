@@ -134,6 +134,7 @@ uberInfo = svg2.selectAll("uber_text")
   				.attr('y', function(d, i) {
     					return ((i+1) * 150);
   				})
+				.attr("class", "uber_text")
   				.style("fill", "white")
   				.text(function(d, i) {
     				return uberTripNums[i] + " " + d;
@@ -148,6 +149,7 @@ bikeInfo = svg2.selectAll("bike_text")
   				.attr('y', function(d, i) {
     					return ((i+1) * 150);
   				})
+				.attr("class", "bike_text")
   				.style("fill", "white")
   				.text(function(d, i) {
     				return bikeTripNums[i] + " " + d;
@@ -172,18 +174,74 @@ addBikeLogo = svg2.selectAll("bike_logo")
 
 function getUserInfo() {
 	var userInfo = [];
-	 month = document.getElementById("month").value;
-	 day = document.getElementById("day").value;
-	 time = document.getElementById("time").value;
-	 weight = document.getElementById("weight").value;
-	 height = document.getElementById("height").value;
-	 userInfo.push(month, day, time, weight, height)
+	month = document.getElementById("month").value;
+	day = document.getElementById("day").value;
+	time = document.getElementById("time").value;
+	weight = document.getElementById("weight").value;
+	height = document.getElementById("height").value;
+	userInfo.push(month, day, time, weight, height);
+	return userInfo;
 	 //console.log(userInfo);
 }
 
+function addUberResults(uberTripNums) {
+	//uberTripNums = [time, calories, emissions]
+	svg2.selectAll(".uber_text").remove();
+
+	svg2.selectAll("#uber_text")
+				.data(tripLabels)
+				.enter()
+				.append("text")
+				.attr("transform", "translate(" + 0 + "," + ((1/5)*height_trip_info - 50)  + ")")
+  				.attr('x', 0.1*width_trip_info)
+  				.attr('y', function(d, i) {
+    					return ((i+1) * 150);
+  				})
+  				.attr("class", "uber_text")
+  				.style("fill", "white")
+  				.text(function(d, i) {
+    				return uberTripNums[i] + " " + d;
+  				});
+
+}
+
+function addBikeResults(bikeTripNums) {
+	//bikeTripNums = [time, calories, emissions]
+	svg2.selectAll(".bike_text").remove();
+
+	svg2.selectAll("#bike_text")
+				.data(tripLabels)
+				.enter()
+				.append("text")
+				.attr("transform", "translate(" + width_trip_info/2 + "," + ((1/5)*height_trip_info - 50)  + ")")
+  				.attr('x', 0.3*width_trip_info)
+  				.attr('y', function(d, i) {
+    					return ((i+1) * 150);
+  				})
+  				.attr("class", "bike_text")
+  				.style("fill", "white")
+  				.text(function(d, i) {
+    				return bikeTripNums[i] + " " + d;
+  				});
+
+};
+
+function compareTrips() {
+	var userInfo = getUserInfo();
+	//Do stuff with user info and get results for uber and citibike
+	//Right now using random numbers as a sample
+	
+	var uberResults = [Math.random(), 1, 1]; //[time, calories, emissions]
+	var bikeResults = [Math.random(), 1, 1]; //[time, calories, emissions]
+	
+	addUberResults(uberResults);
+	addBikeResults(bikeResults);
+
+};
+
 document.addEventListener("DOMContentLoaded", function(event) {
   var button = document.querySelector("input[name=compareTripsButton]");
-  button.addEventListener("click", getUserInfo, false);
+  button.addEventListener("click", compareTrips, false);
   var map = L.map('map' /* The id of the DOM element that will contain the map */);
 
   map.setView([40.703312, -73.97968], 10);
