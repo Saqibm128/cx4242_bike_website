@@ -181,8 +181,24 @@ function getUserInfo() {
 	height = document.getElementById("height").value;
 	userInfo.push(month, day, time, weight, height);
 	return userInfo;
-	 //console.log(userInfo);
-}
+};
+
+function calories_burnt_biking(weight, distance_biked){ 
+    var cals_burned = 0;    
+    if(weight>= 125){
+        cals_burned = Math.round((40 + ((weight-125) * 0.32)) * distance_biked);
+    }
+    else{
+        cals_burned = Math.round((25 + ((weight-75) * 0.32)) * distance_biked);
+    }
+        
+    return cals_burned;
+};
+
+function co2_emissions_per_ride(distance_ride){
+    var co2 = Math.round(404 * distance_ride);
+    return co2;
+};
 
 function addUberResults(uberTripNums) {
 	//uberTripNums = [time, calories, emissions]
@@ -228,15 +244,29 @@ function addBikeResults(bikeTripNums) {
 
 function compareTrips() {
 	var userInfo = getUserInfo();
-	//Do stuff with user info and get results for uber and citibike
-	//Right now using random numbers as a sample
-	
-	var uberResults = [Math.random(), 1, 1]; //[time, calories, emissions]
-	var bikeResults = [Math.random(), 1, 1]; //[time, calories, emissions]
-	
-	addUberResults(uberResults);
-	addBikeResults(bikeResults);
+	var weight = userInfo[3];
+	//Process user info
+	//Get distance and time estimates (currently random nums to check)
 
+	//Citibike
+	var bikeDistance = Math.random();
+	var bikeTime = Math.random();
+	var bikeCalories = calories_burnt_biking(weight, bikeDistance);
+	var bikeEmissions = 0;
+
+
+	//Uber
+	var uberDistance = Math.random();
+	var uberTime = Math.random();
+	var uberCalories = 0;
+	var uberEmissions = co2_emissions_per_ride(uberDistance);
+
+
+	var uberResults = [uberTime, uberCalories, uberEmissions]; //[time, calories, emissions]
+	var bikeResults = [bikeTime, bikeCalories, bikeEmissions]; //[time, calories, emissions]
+
+	addBikeResults(bikeResults);
+	addUberResults(uberResults);
 };
 
 document.addEventListener("DOMContentLoaded", function(event) {
