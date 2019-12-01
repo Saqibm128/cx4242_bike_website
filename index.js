@@ -244,6 +244,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
 var button = document.getElementById("compareTripsButton");
 if(button){
   button.addEventListener("click", compareTrips, false);
+} else {
+	console.log(button);
 }
   var map = L.map('map' /* The id of the DOM element that will contain the map */);
 
