@@ -34,10 +34,51 @@ async function get_distance_between(startLatLng, endLatLng) {
   return currDistance
 }
 
+async function get_biking_distance_between(startLatLng, endLatLng) {
+  var currDistance = null
+  var service = new google.maps.DistanceMatrixService();
+  service.getDistanceMatrix(
+    {
+      origins: [new google.maps.LatLng(startLatLng[0], startLatLng[1])],
+      destinations: [new google.maps.LatLng(endLatLng[0], endLatLng[1])],
+      travelMode: 'bicycling'
+    }, callback);
+
+  function callback(res) {
+    currDistance = res.rows[0].elements[0].distance.value
+  }
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  while (currDistance == null) {
+    await sleep(200)
+  }
+  return currDistance
+}
+
 async function get_all_uber_rides_for_day_near_lat_lng(day, month, year, startLatLng, endLatLng) {
   // This is an async function
   // Example usage: get_all_uber_rides_for_day(1,10,2014).then(function(res) { svgText.text(res) })
   let result = await fetch("http://ec2-18-212-131-13.compute-1.amazonaws.com:5000/uber_ride/latLng", {
+      "method": "POST", "headers":{"Content-Type":"application/json"},
+      "body": JSON.stringify({
+          "day": day,
+          "month": month,
+          "year": year,
+          "start": {"lat": startLatLng[0], "lng": startLatLng[1]},
+          "end": {"lat": endLatLng[0], "lng": endLatLng[1]}
+      })
+  })
+
+  let resultJson = await result.json()
+  return resultJson
+}
+
+
+async function get_all_citibike_rides_for_day_near_lat_lng(day, month, year, startLatLng, endLatLng) {
+  // This is an async function
+  // Example usage: get_all_uber_rides_for_day(1,10,2014).then(function(res) { svgText.text(res) })
+  let result = await fetch("http://ec2-18-212-131-13.compute-1.amazonaws.com:5000/citibike/latLng", {
       "method": "POST", "headers":{"Content-Type":"application/json"},
       "body": JSON.stringify({
           "day": day,
@@ -176,12 +217,19 @@ uberInfo = svg2.selectAll("uber_text")
 
 function update_all() {
   update_uber()
+  update_bike()
   addUberResults(uberTripNums)
 }
 
 function update_uber() {
   svg2.selectAll("uber_text").text(function(d, i) {
     return uberTripNums[i] + " " + d;
+  });
+}
+
+function update_uber() {
+  svg2.selectAll("bike_text").text(function(d, i) {
+    return bikeTripNums[i] + " " + d;
   });
 }
 
@@ -239,6 +287,14 @@ function getUserInfo() {
          uberTripNums[0] = num_minutes
          update_all()
        })
+     })
+
+     get_all_citibike_rides_for_day_near_lat_lng(day, month, year, startLatLng, endLatLng).then((citibikeRes)=>{
+       values = citibikeRes["values"]
+       trip_durations = values.map((x)=>x[citibike.columns.indexOf("tripduration")])
+       average_trip_durations = trip_durations.reduce((sum, x) => sum + x) / trip_durations.length
+       bikeTripNums[0] = average_trip_durations
+       update_all()
      })
 
 
