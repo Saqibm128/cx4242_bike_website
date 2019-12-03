@@ -9,10 +9,13 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
   accessToken: 'pk.eyJ1IjoiZGpoYWlsIiwiYSI6ImNrMzkyMmRwcjBlNXozaHFzNmdtbzlkNzUifQ.luDWvELbHjFLiprKNQaF0w'
 }).addTo(map);
 
+startLatLng = [40.75, -73.98]
+endLatLng = [40.754, -73.984]
+
 control = L.Routing.control({
   waypoints: [
-    L.latLng(40.75, -73.98),
-    L.latLng(40.754, -73.984)
+    startLatLng,
+    endLatLng
   ]
 }).addTo(map);
 
@@ -34,30 +37,36 @@ map.on('click', function(e) {
         .openOn(map);
 
     L.DomEvent.on(startBtn, 'click', function() {
+      startLatLng = [e.latlng.lat, e.latlng.lng];
       control.spliceWaypoints(0, 1, e.latlng);
       map.closePopup();
+      console.log(startLatLng)
     });
 
     L.DomEvent.on(destBtn, 'click', function() {
+      endLatLng = [e.latlng.lat, e.latlng.lng];
       control.spliceWaypoints(control.getWaypoints().length - 1, 1, e.latlng);
       map.closePopup();
+      console.log(endLatLng)
     });
 });
 
-startLatLng = control.getWaypoints()[0]
-endLatLng = control.getWaypoints()[1]
+// async function getJankRoute() {
+//   let result = await fetch("http://ec2-18-212-131-13.compute-1.amazonaws.com:5000/uber_ride/get_route", {
+//       "method": "POST", "headers":{"Content-Type":"application/json"},
+//       "body": JSON.stringify({
+//           "condition": "where day in " + day + " and year=" + year + " and month = " + month
+//       })
+//   })
 
-async function getJankRoute() {
-  let result = await fetch("http://ec2-18-212-131-13.compute-1.amazonaws.com:5000/uber_ride/get_route", {
-      "method": "POST", "headers":{"Content-Type":"application/json"},
-      "body": JSON.stringify({
-          "condition": "where day in " + day + " and year=" + year + " and month = " + month
-      })
-  })
+//   let resultJson = await result.json()
+//   return resultJson
+// }
 
-  let resultJson = await result.json()
-  return resultJson
+function drawPath(coordList) {
+  var polyline = L.polyline(coordList).addTo(map);
 }
 
+// drawPath([startLatLng, [40.755, -73.99], endLatLng]);
 
 
