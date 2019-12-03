@@ -291,7 +291,7 @@ function getUserInfo() {
 
      get_all_citibike_rides_for_day_near_lat_lng(day, month, year, startLatLng, endLatLng).then((citibikeRes)=>{
        values = citibikeRes["values"]
-       trip_durations = values.map((x)=>x[citibike.columns.indexOf("tripduration")])
+       trip_durations = values.map((x)=>x[citibikeRes.columns.indexOf("tripduration")])
        average_trip_durations = trip_durations.reduce((sum, x) => sum + x) / trip_durations.length
        bikeTripNums[0] = average_trip_durations
        update_all()
