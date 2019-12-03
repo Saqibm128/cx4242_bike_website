@@ -227,7 +227,7 @@ function update_uber() {
   });
 }
 
-function update_uber() {
+function update_bike() {
   svg2.selectAll("bike_text").text(function(d, i) {
     return bikeTripNums[i] + " " + d;
   });
