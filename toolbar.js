@@ -7,6 +7,23 @@ var result = fetch("http://ec2-18-212-131-13.compute-1.amazonaws.com:5000/uber_r
     return (d.json())
 }).then(function(d) {console.log(d)})
 
+async function get_shortest_path(start_junction_id, end_junction_id) {
+  let result = await fetch("http://ec2-18-212-131-13.compute-1.amazonaws.com:5000/short_path_alg", {
+      "method": "POST", "headers":{"Content-Type":"application/json"},
+      "body": JSON.stringify({
+          "start": start_junction_id,
+          "end": end_junction_id
+      })
+  })
+  let resultJson = await result.json()
+  return resultJson
+}
+
+async function get_shortest_path_lat_lngs(start_junction_id, end_junction_id) {
+  result = await get_shortest_path(start_junction_id, end_junction_id)
+  return result.values.map((row) => [row[1], row[2]])
+}
+
 async function get_all_uber_rides_for_day(day, month, year) {
   // This is an async function
   // Example usage: get_all_uber_rides_for_day(1,10,2014).then(function(res) { svgText.text(res) })
@@ -107,8 +124,15 @@ async function get_all_uber_rides_for_day_mean_speed(day, month, year, startLatL
   res = await get_all_uber_rides_for_day_near_lat_lng(day, month, year, startLatLng, endLatLng)
   // console.log(res)
   // console.log(res["columns"].indexOf("speed_mph_mean"))
+
   speeds = res["values"].map((x)=>x[res["columns"].indexOf("speed_mph_mean")])
   sumSpeeds = speeds.reduce((total, speed) => total + speed)
+
+  start_junction_id = res["values"][0][res["columns"].indexOf("start_junction_id")]
+  end_junction_id = res["values"][0][res["columns"].indexOf("end_junction_id")]
+  lat_long_pair_path = await get_shortest_path_lat_lngs(start_junction_id, end_junction_id)
+  drawPath(lat_long_pair_path)
+
   // console.log("hi")
   return sumSpeeds / speeds.length
 }

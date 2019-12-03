@@ -74,6 +74,7 @@ async function get_all_uber_rides_for_day_near_lat_lng(day, month, year, startLa
   return resultJson
 }
 
+// async function la
 
 async function get_all_citibike_rides_for_day_near_lat_lng(day, month, year, startLatLng, endLatLng) {
   // This is an async function
