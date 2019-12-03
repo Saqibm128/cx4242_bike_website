@@ -119,6 +119,19 @@ async function get_all_citibike_rides_for_day_near_lat_lng(day, month, year, sta
   return resultJson
 }
 
+async function get_closest(latitude, longitude) {
+  let result = await fetch("http://ec2-18-212-131-13.compute-1.amazonaws.com:5000/osm_node", {
+      "method": "POST", "headers":{"Content-Type":"application/json"},
+      "body": JSON.stringify({
+        "lat": latitude,
+        "lng": longitude
+      })
+  })
+
+  let resultJson = await result.json()
+  return resultJson.values[0][0]
+}
+
 async function get_all_uber_rides_for_day_mean_speed(day, month, year, startLatLng, endLatLng) {
   // console.log(day)
   res = await get_all_uber_rides_for_day_near_lat_lng(day, month, year, startLatLng, endLatLng)
@@ -130,8 +143,10 @@ async function get_all_uber_rides_for_day_mean_speed(day, month, year, startLatL
 
   start_junction_id = res["values"][0][res["columns"].indexOf("start_junction_id")]
   end_junction_id = res["values"][0][res["columns"].indexOf("end_junction_id")]
-  lat_long_pair_path = await get_shortest_path_lat_lngs(start_junction_id, end_junction_id)
-  drawPath(lat_long_pair_path)
+  start_junction_id = await get_closest(startLatLng[0], startLatLng[1])
+  end_junction_id = await get_closest(endLatLng[0], endLatLng[1])
+  get_shortest_path_lat_lngs(start_junction_id, end_junction_id).then(drawPath)
+  // drawPath(lat_long_pair_path)
 
   // console.log("hi")
   return sumSpeeds / speeds.length
